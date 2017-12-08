@@ -1,0 +1,2 @@
+Host = ":9090"
+Statics = "statics"
