@@ -1,0 +1,229 @@
+Kubernetes basics
+
+Mateusz Dymiński
+Nokia
+
+[[github.com/mateuszdyminski/docker][github.com/mateuszdyminski/docker]]
+@m_dyminski
+
+* Agenda
+
+- What is a kubernetes?
+- Minikube
+- Kubectl
+- Demo
+
+* What is a kubernetes?
+
+- Portable: public, private, hybrid, multi-cloud
+- Extensible: modular, pluggable, hookable, composable
+- Self-healing: auto-placement, auto-restart, auto-replication, auto-scaling
+
+* What is a kubernetes?
+
+.image img/why_containers.svg _ 700
+
+* Kubernetes most important features
+
+- Co-locating helper processes, facilitating composite applications and preserving the one-application-per-container model
+- Mounting storage systems
+- Distributing secrets
+- Checking application health
+- Replicating application instances
+- Using Horizontal Pod Autoscaling
+- Naming and discovering
+- Balancing loads
+- Rolling updates
+- Monitoring resources
+- Accessing and ingesting logs
+- Providing authentication and authorization
+
+* Kubernetes glossary - 1
+
+- Annotation
+    A key-value pair that is used to attach arbitrary non-identifying metadata to objects. [+]
+- Cluster
+    A set of machines, called nodes, that run containerized applications managed by Kubernetes. [+]
+- Container
+    A lightweight and portable executable image that contains software and all of its dependencies. [+]
+- DaemonSet
+    Ensures a copy of a Pod is running across a set of nodes in a Cluster. [+]
+- Deployment
+    An API object that manages a replicated application. [+]
+
+* Kubernetes glossary - 2
+
+- Image
+    Stored instance of a container that holds a set of software needed to run an application. [+]
+- Kubectl
+    A command line tool for communicating with a Kubernetes API server. [+]
+- Kubelet
+    An agent that runs on each node in the cluster. It makes sure that containers are running in a pod. [+]
+- Kubernetes API
+    The application that serves Kubernetes functionality through a RESTful interface and stores the state of the cluster. [+]
+- Labels
+    Used to tag objects with identifying attributes that are meaningful and relevant to users. [+]
+
+
+* Kubernetes glossary - 3
+
+- Namespace
+    An abstraction used by Kubernetes to support virtual clusters on the same physical Cluster. [+]
+- Node
+    Also known as: Minion A node is a worker machine in Kubernetes. [+]
+- Pod
+    The smallest and simplest Kubernetes object. A Pod represents a set of running containers on your cluster. [+]
+- Replication Controller
+    Kubernetes service that ensures a specific number of instances of a pod are always running. [+]
+- Resource Quotas
+    Provides constraints that limit aggregate resource consumption per Namespace. [+]
+
+* Kubernetes glossary - 4
+
+- Service
+    An API object that describes how to access applications, such as a set of Pods, and can describe ports and load-balancers. [+]
+- Volume
+    A directory containing data, accessible to the containers in a pod. [+]
+- Minikube
+    A tool for running Kubernetes locally. [+]
+
+* Minikube
+
+* Minikube
+
+Minikube is a tool that makes it easy to run Kubernetes locally. Minikube runs a single-node Kubernetes cluster inside a VM on your laptop for users looking to try out Kubernetes or develop with it day-to-day.
+
+* Minikube commands
+
+    minikube start --docker-env HTTP_PROXY=http://10.144.1.10:8080  --docker-env HTTPS_PROXY=https://10.144.1.10:8080
+
+    minikube status
+
+    minikube dashboard --url
+
+    minikube stop
+
+    minikube delete
+
+    minikube ssh
+
+* Kubectl
+
+* Kubectl
+
+kubectl is a command line interface for running commands against Kubernetes clusters. This overview covers kubectl syntax, describes the command operations, and provides common examples. For details about each command, including all the supported flags and subcommands, see the kubectl reference documentation.
+
+* Kubectl - basics
+
+    kubectl config view
+
+    kubectl config use-context minikube
+
+    kubectl run hello-minikube --image=gcr.io/google_containers/echoserver:1.4 --port=8080
+
+    kubectl expose deployment hello-minikube --type=NodePort
+
+    kubectl get pod
+
+    kubectl get service
+
+    minikube service hello-minikube --url
+
+    kubectl delete deployment hello-minikube
+
+* Demo
+
+* Let's run out Http server
+
+* Http - Namespace
+
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: demo
+
+* Http - Limits
+
+    apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: demo-limits
+      namespace: demo
+    spec:
+      hard:
+        cpu: "1"
+        memory: 3Gi
+        resourcequotas: "1"
+
+* Http - Deployment
+
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    metadata:
+      name: http
+      namespace: demo
+    spec:
+      replicas: 3
+      revisionHistoryLimit: 0
+      template:
+        metadata:
+          labels:
+            app: http
+            serviceName: http-service
+        spec:
+          containers:
+          - name: http-container
+            image: index.docker.io/mateuszdyminski/http:latest
+            ports:
+              - containerPort: 9090
+            resources:
+                limits:
+                  memory: 100Mi
+                  cpu: 200m
+                requests:
+                  memory: 100Mi
+                  cpu: 200m
+
+* Http - service
+
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: http-service
+      namespace: demo
+      labels:
+        app: http
+    spec:
+      type: NodePort
+      ports:
+      - port: 9090
+      selector:
+        app: http
+
+* Kubectl
+
+    kubectl create -f namespaces/namespace.yml
+
+    kubectl create -f limits/limits.yml
+
+    kubectl create -f deployments/http.yml
+
+    kubectl create -f services/http-service.yml
+
+    kubectl --namespace=demo get pods
+
+    kubectl --namespace=demo get services
+
+    minikube service http-service --namespace=demo --url
+
+    kubectl scale --replicas=3 -f deployments/http.yml
+
+    # Clean up
+    kubectl delete -f services/http-service.yml
+    kubectl delete -f deployments/http.yml
+    kubectl delete -f limits/limits.yml
+    kubectl delete -f namespaces/namespace.yml
+
+
+
+

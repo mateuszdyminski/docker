@@ -241,6 +241,10 @@ Uts namespace
 
 Allows a process (or group of processes) to have own: IPC semaphores IPC message queues IPC shared memory ... without risk of conflict with other instances.
 
+* Demo
+
+* Dockerfile
+
 * Dockerfile
 
     FROM golang:1.9.2-alpine
@@ -264,6 +268,8 @@ Allows a process (or group of processes) to have own: IPC semaphores IPC message
     RUN chmod +x /usr/share/http/http
 
     ENTRYPOINT /usr/share/http/http -config=/usr/share/http/config/config.toml
+
+* Docker Commands
 
 * Docker Commands - running
 

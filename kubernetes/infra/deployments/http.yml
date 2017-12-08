@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: http
+  namespace: demo
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  template:
+    metadata:
+      labels:
+        app: http
+        serviceName: http-service
+    spec:
+      containers:
+      - name: http-container
+        image: index.docker.io/mateuszdyminski/http:latest
+        ports:
+          - containerPort: 9090
+        resources:
+            limits:
+              memory: 100Mi
+              cpu: 200m
+            requests:
+              memory: 100Mi
+              cpu: 200m
